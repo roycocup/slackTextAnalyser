@@ -38,11 +38,15 @@ func main() {
 	// spew.Dump(api.GetChannelInfo("C2957KZML"))
 	// spew.Dump(api.GetUserInfo("UM10263HU"))
 
-	channelId, err := getChannelByName(api, "articles")
+	targetChannel := "articles"
+
+	deleteFile(targetChannel + ".txt")
+
+	chanelID, err := getChannelByName(api, targetChannel)
 	checkError(err)
 
 	params := slack.GetConversationHistoryParameters{
-		ChannelID: channelId,
+		ChannelID: chanelID,
 		Limit:     100,
 	}
 	convos, _ := api.GetConversationHistory(&params)
@@ -52,7 +56,7 @@ func main() {
 	for msgIndex := range convos.Messages {
 		msg := convos.Messages[msgIndex].Msg.Text
 		spew.Dump(msg)
-		write("messages.txt", msg)
+		write(targetChannel+".txt", msg)
 		storedLines = append(storedLines, msg)
 	}
 	spew.Dump(len(storedLines))
@@ -65,6 +69,11 @@ func main() {
 	// }
 	// c.Set("users", getUsers(api), cache.DefaultExpiration)
 
+}
+
+func deleteFile(fileName string) {
+	err := os.Remove(fileName)
+	checkError(err)
 }
 
 func getChannelByName(api *slack.Client, chanName string) (string, error) {
@@ -80,14 +89,10 @@ func getChannelByName(api *slack.Client, chanName string) (string, error) {
 }
 
 func write(filename string, msg string) {
-	// if _, err := os.Stat(filename); err != nil {
-	// 	f, _ := os.Create(filename)
-	// 	f.Close()
-	// }
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0777)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
 	checkError(err)
 	defer f.Close()
-	f.WriteString(msg)
+	f.WriteString("\n" + msg)
 }
 
 func getChannels(api *slack.Client) []slack.Channel {
