@@ -28,11 +28,30 @@ func main() {
 		token: os.Getenv("TOKEN"),
 		debug: true,
 	}
+	// steveLockwood := "U1XQT70UF"
+	// davidgarcia := "UM10263HU"
+	softwareEngineeringChan := "C2957KZML"
 
 	api := slack.New(cnf.token, slack.OptionDebug(cnf.debug))
 	// getChannels(api)
-	spew.Dump(api.GetChannelInfo("CEXG0RH7W"))
-	// spew.Dump(api.GetUserInfo("U1XQT70UF"))
+	// spew.Dump(api.GetChannelInfo("C2957KZML"))
+	// spew.Dump(api.GetUserInfo("UM10263HU"))
+	params := slack.GetConversationHistoryParameters{
+		ChannelID: softwareEngineeringChan,
+		Limit:     10,
+	}
+	convos, _ := api.GetConversationHistory(&params)
+
+	storedLines := []string{}
+
+	for msgIndex := range convos.Messages {
+		msg := convos.Messages[msgIndex].Msg.Text
+		write("messages.txt", msg)
+		storedLines = append(storedLines, msg)
+	}
+
+	// spew.Dump(storedLines)
+	// spew.Dump(len(storedLines))
 
 	// c := cache.New(5*time.Minute, 10*time.Minute)
 	// if (c.Get("users") != null){
@@ -41,8 +60,19 @@ func main() {
 
 }
 
+func write(filename string, msg string) {
+	// if _, err := os.Stat(filename); err != nil {
+	// 	f, _ := os.Create(filename)
+	// 	f.Close()
+	// }
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0777)
+	checkError(err)
+	defer f.Close()
+	f.WriteString(msg)
+}
+
 func getChannels(api *slack.Client) {
-	channels, err := api.GetChannels(false)
+	channels, err := api.GetChannels(true)
 	checkError(err)
 
 	for _, channel := range channels {
