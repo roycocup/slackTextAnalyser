@@ -30,28 +30,44 @@ func main() {
 	}
 
 	api := slack.New(cnf.token, slack.OptionDebug(cnf.debug))
-	getUsers(api)
+	// getChannels(api)
+	spew.Dump(api.GetChannelInfo("CEXG0RH7W"))
+	// spew.Dump(api.GetUserInfo("U1XQT70UF"))
 
-	// spew.Dump(api.GetUserInfo("UH8PLH527"))
-
-	// groups, err := api.GetGroups(false)
-	// checkError(err)
-	// for _, group := range groups {
-	// 	fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
+	// c := cache.New(5*time.Minute, 10*time.Minute)
+	// if (c.Get("users") != null){
 	// }
-
-	// channels, err := api.GetChannels(true)
-	// checkError(err)
-	// for _, channel := range channels {
-	// 	spew.Dump(channel.ID + " - " + channel.Name)
-	// }
+	// c.Set("users", getUsers(api), cache.DefaultExpiration)
 
 }
 
-func getUsers(api *slack.Client) {
+func getChannels(api *slack.Client) {
+	channels, err := api.GetChannels(false)
+	checkError(err)
+
+	for _, channel := range channels {
+		spew.Dump(channel.ID + " - " + channel.Name)
+	}
+	spew.Dump(len(channels))
+}
+
+func getGroups(api *slack.Client) {
+	groups, err := api.GetGroups(true)
+	checkError(err)
+
+	for _, group := range groups {
+		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
+	}
+}
+
+func getUsers(api *slack.Client) (user []slack.User) {
 	users, _ := api.GetUsers()
-	for _, user := range users {
-		spew.Dump(user.RealName + " " + user.ID)
+	return users
+}
+
+func foreach(objs []interface{}) {
+	for _, obj := range objs {
+		spew.Dump(obj)
 	}
 }
 
