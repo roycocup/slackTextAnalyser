@@ -37,7 +37,7 @@ func main() {
 	// getChannels(api)
 	// spew.Dump(api.GetChannelInfo("C2957KZML"))
 	// spew.Dump(api.GetUserInfo("UM10263HU"))
-:
+
 	channelId, err := getChannelByName(api, "articles")
 	checkError(err)
 
@@ -67,12 +67,12 @@ func main() {
 
 }
 
-func getChannelByName(api *slack.Client, chanName string)  (string, error) {
+func getChannelByName(api *slack.Client, chanName string) (string, error) {
 
 	channels := getChannels(api)
 
 	for i := range channels {
-		if channels[i].Name == chanName{
+		if channels[i].Name == chanName {
 			return channels[i].ID, nil
 		}
 	}
