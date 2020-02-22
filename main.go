@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -30,15 +31,19 @@ func main() {
 	}
 	// steveLockwood := "U1XQT70UF"
 	// davidgarcia := "UM10263HU"
-	softwareEngineeringChan := "C2957KZML"
+	// softwareEngineeringChan := "C2957KZML"
 
 	api := slack.New(cnf.token, slack.OptionDebug(cnf.debug))
 	// getChannels(api)
 	// spew.Dump(api.GetChannelInfo("C2957KZML"))
 	// spew.Dump(api.GetUserInfo("UM10263HU"))
+:
+	channelId, err := getChannelByName(api, "articles")
+	checkError(err)
+
 	params := slack.GetConversationHistoryParameters{
-		ChannelID: softwareEngineeringChan,
-		Limit:     10,
+		ChannelID: channelId,
+		Limit:     100,
 	}
 	convos, _ := api.GetConversationHistory(&params)
 
@@ -46,9 +51,11 @@ func main() {
 
 	for msgIndex := range convos.Messages {
 		msg := convos.Messages[msgIndex].Msg.Text
+		spew.Dump(msg)
 		write("messages.txt", msg)
 		storedLines = append(storedLines, msg)
 	}
+	spew.Dump(len(storedLines))
 
 	// spew.Dump(storedLines)
 	// spew.Dump(len(storedLines))
@@ -58,6 +65,18 @@ func main() {
 	// }
 	// c.Set("users", getUsers(api), cache.DefaultExpiration)
 
+}
+
+func getChannelByName(api *slack.Client, chanName string)  (string, error) {
+
+	channels := getChannels(api)
+
+	for i := range channels {
+		if channels[i].Name == chanName{
+			return channels[i].ID, nil
+		}
+	}
+	return "", errors.New("Channel not found")
 }
 
 func write(filename string, msg string) {
@@ -71,14 +90,11 @@ func write(filename string, msg string) {
 	f.WriteString(msg)
 }
 
-func getChannels(api *slack.Client) {
+func getChannels(api *slack.Client) []slack.Channel {
 	channels, err := api.GetChannels(true)
 	checkError(err)
 
-	for _, channel := range channels {
-		spew.Dump(channel.ID + " - " + channel.Name)
-	}
-	spew.Dump(len(channels))
+	return channels
 }
 
 func getGroups(api *slack.Client) {
