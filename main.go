@@ -38,7 +38,7 @@ func main() {
 	// spew.Dump(api.GetChannelInfo("C2957KZML"))
 	// spew.Dump(api.GetUserInfo("UM10263HU"))
 
-	targetChannel := "articles"
+	targetChannel := "dev-support"
 
 	deleteFile(targetChannel + ".txt")
 
@@ -50,15 +50,16 @@ func main() {
 		Limit:     100,
 	}
 	convos, _ := api.GetConversationHistory(&params)
+	numMessages := len(convos.Messages)
 
 	storedLines := []string{}
-
-	for msgIndex := range convos.Messages {
-		msg := convos.Messages[msgIndex].Msg.Text
+	for i := numMessages - 1; i >= 0; i-- {
+		msg := convos.Messages[i].Msg.Text
 		spew.Dump(msg)
 		write(targetChannel+".txt", msg)
 		storedLines = append(storedLines, msg)
 	}
+
 	spew.Dump(len(storedLines))
 
 	// spew.Dump(storedLines)
