@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
@@ -54,13 +55,13 @@ func main() {
 
 	storedLines := []string{}
 	for i := numMessages - 1; i >= 0; i-- {
-		msg := convos.Messages[i].Msg.Text
-		spew.Dump(msg)
-		write(targetChannel+".txt", msg)
-		storedLines = append(storedLines, msg)
+		msg := convos.Messages[i].Msg
+		spew.Dump(msg.Text)
+		write(targetChannel+".txt", msg.Text)
+		storedLines = append(storedLines, msg.Text)
 	}
 
-	spew.Dump(len(storedLines))
+	spew.Dump(strconv.Itoa(len(storedLines)) + " Lines")
 
 	// spew.Dump(storedLines)
 	// spew.Dump(len(storedLines))
