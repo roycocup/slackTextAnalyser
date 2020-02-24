@@ -65,14 +65,6 @@ func main() {
 
 	spew.Dump(strconv.Itoa(len(storedLines)) + " Lines")
 
-	// spew.Dump(storedLines)
-	// spew.Dump(len(storedLines))
-
-	// c := cache.New(5*time.Minute, 10*time.Minute)
-	// if (c.Get("users") != null){
-	// }
-	// c.Set("users", getUsers(api), cache.DefaultExpiration)
-
 }
 
 func getUser(api *slack.Client, userCode string) string {
