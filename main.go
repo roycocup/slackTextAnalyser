@@ -18,6 +18,8 @@ type config struct {
 	debug bool
 }
 
+var users = make(map[string]*slack.User)
+
 func main() {
 
 	err := godotenv.Load()
@@ -39,7 +41,7 @@ func main() {
 	// spew.Dump(api.GetChannelInfo("C2957KZML"))
 	// spew.Dump(api.GetUserInfo("UM10263HU"))
 
-	targetChannel := "dev-support"
+	targetChannel := "dev_announcements"
 
 	deleteFile(targetChannel + ".txt")
 
@@ -48,7 +50,7 @@ func main() {
 
 	params := slack.GetConversationHistoryParameters{
 		ChannelID: chanelID,
-		Limit:     100,
+		Limit:     500,
 	}
 	convos, _ := api.GetConversationHistory(&params)
 	numMessages := len(convos.Messages)
@@ -56,9 +58,9 @@ func main() {
 	storedLines := []string{}
 	for i := numMessages - 1; i >= 0; i-- {
 		msg := convos.Messages[i].Msg
-		spew.Dump(msg.Text)
-		write(targetChannel+".txt", msg.Text)
-		storedLines = append(storedLines, msg.Text)
+		storable := msg.Timestamp + " - " + getUser(api, msg.User) + " - " + msg.Text
+		write(targetChannel+".txt", storable)
+		storedLines = append(storedLines, storable)
 	}
 
 	spew.Dump(strconv.Itoa(len(storedLines)) + " Lines")
@@ -71,6 +73,15 @@ func main() {
 	// }
 	// c.Set("users", getUsers(api), cache.DefaultExpiration)
 
+}
+
+func getUser(api *slack.Client, userCode string) string {
+	if users[userCode] == nil {
+		user, _ := api.GetUserInfo(userCode)
+		users[userCode] = user
+	}
+
+	return users[userCode].RealName
 }
 
 func deleteFile(fileName string) {
