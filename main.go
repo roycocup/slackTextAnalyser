@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
@@ -16,6 +17,8 @@ type config struct {
 	token string
 	debug bool
 }
+
+var users = make(map[string]*slack.User)
 
 func main() {
 
@@ -47,6 +50,7 @@ func main() {
 	// spew.Dump(chann)
 	// return
 
+
 	// spew.Dump(api.GetChannelInfo(softwareEngineeringChan))
 	// spew.Dump(api.GetChannelInfo(daily_reporting)) // daily reporting
 
@@ -58,11 +62,27 @@ func main() {
 		ChannelID: chans["dailyReporting"],
 		Limit:     10,
 		Inclusive: true,
+
+	params := slack.GetConversationHistoryParameters{
+		ChannelID: chanelID,
+		Limit:     500,
 	}
 	convos, _ := api.GetConversationHistory(&params)
+	numMessages := len(convos.Messages)
+
 
 	spew.Dump(convos)
 	return
+
+	// targetChannel := "dev_announcements"
+
+	// deleteFile(targetChannel + ".txt")
+
+	// chanelID, err := getChannelByName(api, targetChannel)
+	// checkError(err)
+
+
+
 	// storedLines := []string{}
 
 	// for msgIndex := range convos.Messages {
@@ -73,14 +93,31 @@ func main() {
 	// }
 	// spew.Dump(len(storedLines))
 
-	// spew.Dump(storedLines)
-	// spew.Dump(len(storedLines))
-
-	// c := cache.New(5*time.Minute, 10*time.Minute)
-	// if (c.Get("users") != null){
+	// storedLines := []string{}
+	// for i := numMessages - 1; i >= 0; i-- {
+	// 	msg := convos.Messages[i].Msg
+	// 	storable := msg.Timestamp + " - " + getUser(api, msg.User) + " - " + msg.Text
+	// 	write(targetChannel+".txt", storable)
+	// 	storedLines = append(storedLines, storable)
 	// }
-	// c.Set("users", getUsers(api), cache.DefaultExpiration)
 
+
+	// spew.Dump(strconv.Itoa(len(storedLines)) + " Lines")
+
+}
+
+func getUser(api *slack.Client, userCode string) string {
+	if users[userCode] == nil {
+		user, _ := api.GetUserInfo(userCode)
+		users[userCode] = user
+	}
+
+	return users[userCode].RealName
+}
+
+func deleteFile(fileName string) {
+	err := os.Remove(fileName)
+	checkError(err)
 }
 
 func getChannelByName(api *slack.Client, chanName string) (string, error) {
@@ -96,14 +133,10 @@ func getChannelByName(api *slack.Client, chanName string) (string, error) {
 }
 
 func write(filename string, msg string) {
-	// if _, err := os.Stat(filename); err != nil {
-	// 	f, _ := os.Create(filename)
-	// 	f.Close()
-	// }
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0777)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
 	checkError(err)
 	defer f.Close()
-	f.WriteString(msg)
+	f.WriteString("\n" + msg)
 }
 
 func getChannels(api *slack.Client) []slack.Channel {
