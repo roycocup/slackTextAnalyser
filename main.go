@@ -31,31 +31,47 @@ func main() {
 	}
 	// steveLockwood := "U1XQT70UF"
 	// davidgarcia := "UM10263HU"
-	// softwareEngineeringChan := "C2957KZML"
+	softwareEngineeringChan := "C2957KZML"
+	daily_reporting := "G2T54NDT5"
+	chans := map[string]string{"dailyReporting": daily_reporting, "softwareEngineeringChan": softwareEngineeringChan}
 
 	api := slack.New(cnf.token, slack.OptionDebug(cnf.debug))
-	// getChannels(api)
-	// spew.Dump(api.GetChannelInfo("C2957KZML"))
-	// spew.Dump(api.GetUserInfo("UM10263HU"))
+	// channs := getChannels(api)
+	// spew.Dump(channs)
+	// params := slack.GetConversationsParameters{
+	// 	Limit:           500,
+	// 	Types:           []string{"private_channel"},
+	// 	ExcludeArchived: "true",
+	// }
+	// chann, _, _ := api.GetConversations(&params)
+	// spew.Dump(chann)
+	// return
 
-	channelId, err := getChannelByName(api, "articles")
-	checkError(err)
+	// spew.Dump(api.GetChannelInfo(softwareEngineeringChan))
+	// spew.Dump(api.GetChannelInfo(daily_reporting)) // daily reporting
+
+	// spew.Dump(api.GetUserInfo("UM10263HU"))
+	// channelId, err := getChannelByName(api, "devops_dailyreporting")
+	// checkError(err)
 
 	params := slack.GetConversationHistoryParameters{
-		ChannelID: channelId,
-		Limit:     100,
+		ChannelID: chans["dailyReporting"],
+		Limit:     10,
+		Inclusive: true,
 	}
 	convos, _ := api.GetConversationHistory(&params)
 
-	storedLines := []string{}
+	spew.Dump(convos)
+	return
+	// storedLines := []string{}
 
-	for msgIndex := range convos.Messages {
-		msg := convos.Messages[msgIndex].Msg.Text
-		spew.Dump(msg)
-		write("messages.txt", msg)
-		storedLines = append(storedLines, msg)
-	}
-	spew.Dump(len(storedLines))
+	// for msgIndex := range convos.Messages {
+	// 	msg := convos.Messages[msgIndex].Msg.Text
+	// 	spew.Dump(msg)
+	// 	write("messages.txt", msg)
+	// 	storedLines = append(storedLines, msg)
+	// }
+	// spew.Dump(len(storedLines))
 
 	// spew.Dump(storedLines)
 	// spew.Dump(len(storedLines))
